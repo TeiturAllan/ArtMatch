@@ -10,8 +10,9 @@ import { getAuth, signOut } from "firebase/auth";
 const auth = getAuth()
 
 
-
+//importation of Screens that will be used in the MyProfileStack
 import EditProfileScreen from "./EditProfileScreen"; <EditProfileScreen/>
+import UploadArtPieceScreen from "./UploadArtPieceScreen"; <UploadArtPieceScreen/>
 
 const Stack = createNativeStackNavigator();
 
@@ -20,26 +21,23 @@ function MyProfileStack(){//this is the component that gets exported, as i want 
         <Stack.Navigator>
             <Stack.Screen name="MyProfile" component={MyProfileScreen} />
             <Stack.Screen name="Edit Profile" component={EditProfileScreen}/>
+            <Stack.Screen name="Upload Art Piece" component={UploadArtPieceScreen}/>
         </Stack.Navigator>
     )
 }
 
 function determineImageURL(user) { //function used to determine the URL for the profile picture that will be displayed
     if (user.photoURL !== null) {
-        console.log('image is not undefined')
         return user.photoURL
     } else {//if the profile picture is undefined (no profile picture has been chosen by the user), then the default profile picture will be a question mark
-        console.log('image is undefined and therefore will show a question mark')
         return 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/1200px-Blue_question_mark_icon.svg.png'
     }
 }
 
 function determineProfileName(user){
     if (user.displayName !== null) {
-        console.log('display name is undefined/null')
         return user.displayName
-    } else {//if the profile picture is undefined (no profile picture has been chosen by the user), then the default profile picture will be a question mark
-        
+    } else {//if the profile does not have a displayName (displayName = null) then the line below will be shown where the username should be displayed 
         return 'you have not inserted a name yet, press the "edit profile" button to insert a username'
     }
 }
@@ -47,14 +45,8 @@ function determineProfileName(user){
 function MyProfileScreen({navigation}) {
     
     const user = auth.currentUser
-    console.log(user)
     const imageURL = determineImageURL(user)
     const userDisplayName = determineProfileName(user)
-    //console.log(imageURL)
-
-
-
-
 
     const handleLogOut = async () => {
         await signOut(auth).then(()=> {
@@ -95,7 +87,7 @@ function MyProfileScreen({navigation}) {
             </View>
             <View id="TopButtonContainer" style={styles.TopButtonContainer}>
                 <TouchableOpacity style={styles.editProfileButton}
-                    //onPress={()=> {navigation.navigate('Upload Art Piece')}}
+                    onPress={()=> {navigation.navigate('Upload Art Piece')}}
                 >
                     <Text style>Upload new art piece</Text>
                 </TouchableOpacity>
@@ -105,19 +97,10 @@ function MyProfileScreen({navigation}) {
                     <Text style>Place uploaded image for sell</Text>
                 </TouchableOpacity>
             </View>
-
-
-            
-
-            
-            
         </View>
     )
 }
-/*
 
-
-*/
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -171,9 +154,9 @@ const styles = StyleSheet.create({
     },
         LineUnderArtistName: {
             width: '90%',
-            height: 5,
-            backgroundColor: 'blue',
-            marginVertical: 10
+            backgroundColor: 'green',
+            height: 5
+            
         }
     
   });

@@ -7,15 +7,14 @@ import { TextInput } from "react-native-paper";
 function EditProfileScreen() {
     const auth = getAuth()
     const user = auth.currentUser
-
     const [displayName, setDisplayName] = useState(user.displayName)
     const [profilePicURL, setProfilePicURL] = useState(user.photoURL)
 
     //this function only allows users to provide a link to their image, this should be fixed in later itterations of the app.
-    function handleUserUpdate(displayName, profilePicURL){
+    const handleUserUpdate = async() => {
         console.log('new display name: '+ displayName)
         console.log('new profile pic URL: ' + profilePicURL)
-        updateProfile(auth.currentUser, {
+        await updateProfile(auth.currentUser, {
             displayName: displayName, photoURL: profilePicURL
         }).then(() => {
             console.log('profile updated')                
@@ -46,7 +45,7 @@ function EditProfileScreen() {
             </View>
             <View style={styles.buttonContainer}>
               <TouchableOpacity
-                onPress={handleUserUpdate(displayName, profilePicURL)}
+                onPress={handleUserUpdate}
                 style={[styles.button, styles.buttonOutline]}
               >
                 <Text style={styles.buttonText}>Update User</Text>

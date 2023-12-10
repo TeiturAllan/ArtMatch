@@ -1,6 +1,5 @@
 currently users can only update their profile picture by providing a link to the desired image, later itterations will have to enable users
 to upload images themselves aswell as allowing users to simply provide a link.
 
-currently the updateProfile function fires every time a letter is changed in either of the text boxes, this needs to be updated, so that it only fires when the
-"update user" button is pressed.
-also the changes are saved into firebase straight away, but it is not updated in the apps memory, and therefor the change is only visible after relaunching the app/signing inn again
+
+the changes made to a profile (in EditProfileScreen.js) are saved into firebase and app memory straight away, but the MyProfileScreen does not reload as it is the bottom stack.
