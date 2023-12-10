@@ -7,7 +7,7 @@ import { NavigationContainer } from '@react-navigation/native';
 
 //firebase importation and definitions
 import { getAuth, signOut } from "firebase/auth";
-const auth = getAuth()
+
 
 
 //importation of Screens that will be used in the MyProfileStack
@@ -43,7 +43,7 @@ function determineProfileName(user){
 }
 
 function MyProfileScreen({navigation}) {
-    
+    const auth = getAuth()
     const user = auth.currentUser
     const imageURL = determineImageURL(user)
     const userDisplayName = determineProfileName(user)
