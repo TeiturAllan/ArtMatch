@@ -17,7 +17,7 @@ import LikedArtistScreen from "../screens/LikedArtistScreen"; <LikedArtistScreen
 import LikedArtPieceScreen from "../screens/LikedArtPieceScreen"; <LikedArtPieceScreen/>
 import MainScreen from "../screens/MainScreen"; <MainScreen/>
 import MainScreenFilters from "../screens/MainScreenFilters"; <MainScreenFilters/>
-import MyProfileScreen from "../screens/MyProfileScreen"; <MyProfileScreen/>
+import MyProfileStack from "../screens/MyProfileScreen"; <MyProfileStack/>
 import SettingsScreen from "../screens/SettingsScreen"; <SettingsScreen/>
 
 
@@ -42,8 +42,9 @@ function MainNavigationPage() {
                 /*options={{headerShown: false}}*//>
 
                 <Tab.Screen name="My Profile"
-                component={MyProfileScreen}
-                /*options={{headerShown: false}}*//>
+                component={MyProfileStack}
+                options={{headerShown: false}}
+                />
                 
             </Tab.Navigator>
         </NavigationContainer>
