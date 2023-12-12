@@ -13,7 +13,7 @@ const firebaseConfig = {
   authDomain: "artmatch-b62bc.firebaseapp.com",
   databaseURL: "https://artmatch-b62bc-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "artmatch-b62bc",
-  storageBucket: "artmatch-b62bc.appspot.com",
+  storageBucket: "gs://artmatch-b62bc.appspot.com",
   messagingSenderId: "192045533053",
   appId: "1:192045533053:web:3ee9141cbf9102cb736e14"
 };

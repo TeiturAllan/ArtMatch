@@ -60,10 +60,10 @@ const LoginPage = (props) =>{
 
   //start of UI
     return(
-        <KeyboardAvoidingView
+        <View
           style={styles.container}
           behavior='padding'>
-            <View style={styles.inputContainer}>
+            <KeyboardAvoidingView style={styles.inputContainer}>
               <TextInput 
                 placeholder='Email'
                 value={email}
@@ -77,7 +77,7 @@ const LoginPage = (props) =>{
                 style={styles.input}
                 secureTextEntry
               />
-            </View>
+            </KeyboardAvoidingView>
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 onPress={handleLoginSubmit}
@@ -92,7 +92,7 @@ const LoginPage = (props) =>{
                 <Text style={styles.buttonText}>Register</Text>
               </TouchableOpacity>
             </View>
-        </KeyboardAvoidingView>
+        </View>
     );
 };
 

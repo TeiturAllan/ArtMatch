@@ -12,7 +12,8 @@ import { getAuth, signOut } from "firebase/auth";
 
 //importation of Screens that will be used in the MyProfileStack
 import EditProfileScreen from "./EditProfileScreen"; <EditProfileScreen/>
-import UploadArtPieceScreen from "./UploadArtPieceScreen"; <UploadArtPieceScreen/>
+import UploadArtPieceScreen from "./UploadArtPieceScreen";import { connectStorageEmulator } from "firebase/storage";
+ <UploadArtPieceScreen/>
 
 const Stack = createNativeStackNavigator();
 
@@ -45,6 +46,7 @@ function determineProfileName(user){
 function MyProfileScreen({navigation}) {
     const auth = getAuth()
     const user = auth.currentUser
+    console.log(user)
     const imageURL = determineImageURL(user)
     const userDisplayName = determineProfileName(user)
 
