@@ -8,34 +8,39 @@ import * as ImagePicker from 'expo-image-picker';
 import { getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL} from "firebase/storage";
-
+import { getFirestore, doc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
 
 
 
 function UploadArtPieceScreen() {
-    //importing user information, so that i can register who uploaded the image/art piece
-    const auth = getAuth()
-    const user = auth.currentUser
+    //start of importation of methods from firebase
+    const firebaseApp = getApp()
+        //importing user information, so that i can register who uploaded the image/art piece
+        const auth = getAuth()
+        const user = auth.currentUser
+        
+        //used for firebase storage
+        const firebaseStorage = getStorage(firebaseApp)
+        
 
+        //used for cloud firestore
+        const firebaseDB = getFirestore(firebaseApp)
+        
+    //end of importation of methods from firebase
+    
     //start of states that will be used when the image is uploaded
     const [artPieceTitle, SetArtPieceTitle] = useState(null)
     const [lengthDimensionCM, SetlengthDimensionCM] = useState(null) //CM stands for centimeter
     const [heightDimensionCM, SetHeightDimensionCM] = useState(null) //CM stands for centimeter
     const [customText, SetCustomText] = useState(null)
     const [image, SetImage] = useState(null) //this state uses the whole image information, rather than just the URI/URL, because som of the attached metadata is used in calculations
-
     const [imageMetaData, SetImageMetaData] = useState(null)
     const [uploading, SetUploading] = useState(false)
+    
     //start of calculations used to make sure that the chosen image retains it's aspect ratio while remaining as large as possible (so that it's easier to see)
     const win = Dimensions.get('window')
     const [imageRatio, setImageRatio] = useState(null)
-    
-    //firebase modules used to upload images to firebase storage
-    const firebaseApp = getApp()
-    const firebaseStorage = getStorage(firebaseApp)
-    const firebaseStorageArtPieceRef = ref(firebaseStorage, `artistData/${user.uid}/artPieces/${artPieceTitle}PaintingOwner${user.uid}`)//this will be the pathName Of The Art Piece Inside The Firebase storage bucket, this must be dynamic
-    //console.log(firebaseStorage)
     
     
 
@@ -75,56 +80,68 @@ function UploadArtPieceScreen() {
 
         } else {
             try {
+                let firebaseStorageArtPieceRef = ref(firebaseStorage, `artistData/${user.uid}/artPieces/${artPieceTitle}PaintingOwner${user.uid}`)//this will be the pathName Of The Art Piece Inside The Firebase storage bucket, this must be dynamic
                 SetUploading(true)
-                const uploadUrl = await uploadImageAsync(image.uri);
-                console.log('uploadURL', uploadUrl)
+                const downloadUrl = await uploadImageAsync(image.uri, firebaseStorageArtPieceRef); //this triggers the uploadImageAsync function which uploads the chosen image. This function is async, as we need the uploadURL later inorder to store the URL with the other information stored in firestore
+                console.log('downloadUrl', downloadUrl)
                 SetImage(null)
-            
+                uploadArtPieceDocToFirestore(downloadUrl, firebaseStorageArtPieceRef)//the image is already uploaded to firebase storage when this function triggers. this function stores all of the relevant information of that artpiece onto the cloud firestore database
             } catch (e) {
                 console.log(e);
-                alert("Upload failed, sorry :(");
+                Alert.alert("Upload failed, sorry :(");
             } finally {
                 SetUploading(false)
-                Alert.alert('The Art Piece was uploaded successfully')
             }
         }
     };
 
-    async function uploadImageAsync(uri) { //this function as well as the uploadImageAndInfo function have been plucked from this example code provided by expo: https://github.com/expo/examples/blob/master/with-firebase-storage-upload/App.js#L193
+    async function uploadImageAsync(uri, firebaseStorageArtPieceRef) { //this function as well as the uploadImageAndInfo function have been plucked from this example code provided by expo: https://github.com/expo/examples/blob/master/with-firebase-storage-upload/App.js#L193
       // Why are we using XMLHttpRequest? See:
       // https://github.com/expo/expo/issues/2402#issuecomment-443726662
-        const blob = await new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.onload = function () {
-              resolve(xhr.response);
-            };
-            xhr.onerror = function (e) {
-              console.log(e);
-              reject(new TypeError("Network request failed"));
-            };
-            xhr.responseType = "blob";
-            xhr.open("GET", uri, true);
-            xhr.send(null);
-        });
-        const result = await uploadBytes(firebaseStorageArtPieceRef, blob, imageMetaData);
-    
-        // We're done with the blob, close and release it
-        blob.close();
-    
-        return await getDownloadURL(firebaseStorageArtPieceRef);
-    }
+        try{ //the whole function is wrapped inside try/catch to ensure that an image is not uploaded to storage, if something fails. if something fails then the user will get an alert telling them that the upload failed
+            const blob = await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.onload = function () {
+                  resolve(xhr.response);
+                };
+                xhr.onerror = function (e) {
+                  console.log(e);
+                  reject(new TypeError("Network request failed"));
+                };
+                xhr.responseType = "blob";
+                xhr.open("GET", uri, true);
+                xhr.send(null);
+            });
 
-      /*
-    async function upploadImageAndInfo(){
-        if(artPieceTitle === null){
-            Alert.alert('You must give your artPiece a name')
-
-        } else {
-  
-        
+            const result = await uploadBytes(firebaseStorageArtPieceRef, blob, imageMetaData);
+    
+            // We're done with the blob, close and release it
+            blob.close();
+            return await getDownloadURL(firebaseStorageArtPieceRef); //returns the downloadURL which will be stored inside the soon to be created document on the firestore database
+        } catch (e) {
+            console.log(e);
+            Alert.alert("Upload failed, sorry :(");
         }
     }
-*/
+
+    async function uploadArtPieceDocToFirestore(downloadURL, firebaseStorageArtPieceRef){//this function creates a document, with all of the relevant artPiece information, onto the firestore database, 
+        const artPieceFirestoreRef = `artPieces/${artPieceTitle}PaintingOwner${user.uid}`
+        const userFirestoreRef = doc(firebaseDB, `Users/${user.uid}`)
+        await setDoc(doc(firebaseDB, artPieceFirestoreRef), {
+            artPieceTitle: artPieceTitle,
+            dimensions: {
+                length: lengthDimensionCM,
+                height: heightDimensionCM
+            },
+            customText: customText,
+            uploaderUID: user.uid,
+            downloadURL: downloadURL,
+            firebaseStorageArtPieceRef: `${firebaseStorageArtPieceRef}`
+        })
+        await updateDoc(userFirestoreRef, {
+            artPiecesUploaded: arrayUnion(`${artPieceFirestoreRef}`)
+        }).then(Alert.alert('Your Art Piece has succesfully been uploaded'))
+    }
     
     return(//start of UI
     <ScrollView>

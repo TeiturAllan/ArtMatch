@@ -46,7 +46,6 @@ function determineProfileName(user){
 function MyProfileScreen({navigation}) {
     const auth = getAuth()
     const user = auth.currentUser
-    console.log(user)
     const imageURL = determineImageURL(user)
     const userDisplayName = determineProfileName(user)
 
