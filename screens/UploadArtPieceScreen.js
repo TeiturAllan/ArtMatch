@@ -34,7 +34,7 @@ function UploadArtPieceScreen() {
     //firebase modules used to upload images to firebase storage
     const firebaseApp = getApp()
     const firebaseStorage = getStorage(firebaseApp)
-    const firebaseStorageArtPieceRef = ref(firebaseStorage, `artistData/${user.uid}/artPieces/${artPieceTitle}PaintingOwner${user.uid} `)//this will be the pathName Of The Art Piece Inside The Firebase storage bucket, this must be dynamic
+    const firebaseStorageArtPieceRef = ref(firebaseStorage, `artistData/${user.uid}/artPieces/${artPieceTitle}PaintingOwner${user.uid}`)//this will be the pathName Of The Art Piece Inside The Firebase storage bucket, this must be dynamic
     //console.log(firebaseStorage)
     
     

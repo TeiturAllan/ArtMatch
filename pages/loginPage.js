@@ -1,27 +1,60 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useState} from 'react';
 import { KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { initializeApp } from 'firebase/app';
+
+
+//importations from firebase module
+import { initializeApp, getApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+
 
 //start of function importation
 import RegisterPage from './RegisterPage';
 
-const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
+
 
 
 
 const LoginPage = (props) =>{
+  //initialization of firebase products
+  const firebaseApp = getApp()
+  const auth = getAuth()
+  const firebaseDB = getFirestore(firebaseApp)
+  
+  async function createUserDocumentInFirestore(user){
+    const userFirestoreRef = `Users/${user.uid}`
+    await setDoc(doc(firebaseDB, userFirestoreRef), {
+      userID: user.uid,
+      userIsPublic: false
+    }).then(console.log('registration successful'))
+    
+  }
+
+  //states used for user creation and authorization
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isCompleted, setCompleted] = useState(false)
   const [errorMessage, setErrorMessage] = useState(null)
-   
-  const auth = getAuth()  
+
+  const handleRegisterSubmit = async() => {
+    await createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      // Signed in 
+      const user = userCredential.user;
+      createUserDocumentInFirestore(user)
+      
+    })
+    .catch((error) => {
+      console.log('error, registration did not work')
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log('errorCode', errorCode)
+      console.log('errorMessage', errorMessage)
+      setErrorMessage(errorMessage)
+      // ..
+    });
+  }
 
 
   const handleLoginSubmit = async () => {
@@ -30,7 +63,6 @@ const LoginPage = (props) =>{
       //this fires if the user is found on the firebase backend and becomes signed in
       const user = userCredential.user
       console.log('success')
-      
     })
     .catch((error) => {
       console.log('error, login did not work')
@@ -40,21 +72,8 @@ const LoginPage = (props) =>{
     })
   }
 
-  const handleRegisterSubmit = async() => {
-    await createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      // Signed in 
-      const user = userCredential.user;
-      console.log('registration successful')
-    })
-    .catch((error) => {
-      console.log('error, registration did not work')
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      setErrorMessage(errorMessage)
-      // ..
-    });
-  }
+
+  
 
  
 
