@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 
-import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer, useIsFocused } from '@react-navigation/native';
 
@@ -12,8 +12,9 @@ import { getAuth, signOut } from "firebase/auth";
 
 //importation of Screens that will be used in the MyProfileStack
 import EditProfileScreen from "./EditProfileScreen"; <EditProfileScreen/>
-import UploadArtPieceScreen from "./UploadArtPieceScreen";import { connectStorageEmulator } from "firebase/storage";
- <UploadArtPieceScreen/>
+import UploadArtPieceScreen from "./UploadArtPieceScreen"; <UploadArtPieceScreen/>
+import ImagesPreviewComponent from "../components/componentsForMyProfileScreen/ImagesPreviewComponent"; <ImagesPreviewComponent/>
+
 
 const Stack = createNativeStackNavigator();
 
@@ -63,44 +64,47 @@ function MyProfileScreen({navigation}) {
 // start of UI for My Profile Screen
     if(isFocused === true){//this is only placed here so that the page will refresh, men it is back in focus (after someone has pressed back to return to this screen) this has been done as updates to the user would not load after being updated
         return(
-            <View style={styles.container}>
-                <View id="TopButtonContainer" style={styles.TopButtonContainer}>
-                    <TouchableOpacity style={styles.editProfileButton}
-                        onPress={()=> {navigation.navigate('Edit Profile')}}    
-                    >
-                        <Text style>Edit Profile</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.LogOutButton}
-                        onPress={handleLogOut}
-                    >
-                        <Text style>Log Out</Text>
-                    </TouchableOpacity>
-                </View>
-                <View id="ProfilePictureContainer" style={styles.ProfilePictureContainer}>
-                    <View id="ProfilePictureFrame" style={styles.ProfilePictureFrame}>
-                        <Image style={styles.profilePicture}
-                        source={{ uri: imageURL }}
-                        resizeMode="contain"
-                        />
+            <ScrollView style={{backgroundColor: "lightblue"}}>
+                <View style={styles.userInfoContainer}>
+                    <View id="TopButtonContainer" style={styles.TopButtonContainer}>
+                        <TouchableOpacity style={styles.editProfileButton}
+                            onPress={()=> {navigation.navigate('Edit Profile')}}    
+                        >
+                            <Text style>Edit Profile</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.LogOutButton}
+                            onPress={handleLogOut}
+                        >
+                            <Text style>Log Out</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View id="ProfilePictureContainer" style={styles.ProfilePictureContainer}>
+                        <View id="ProfilePictureFrame" style={styles.ProfilePictureFrame}>
+                            <Image style={styles.profilePicture}
+                            source={{ uri: imageURL }}
+                            resizeMode="contain"
+                            />
+                        </View>
+                    </View>
+                    <View id="ArtistNameBarContainer" style={styles.ArtistNameBarContainer}>
+                        <Text>{userDisplayName}</Text>
+                        <View id="LineUnderArtistName" style={styles.LineUnderArtistName}></View>
+                    </View>
+                    <View id="TopButtonContainer" style={styles.TopButtonContainer}>
+                        <TouchableOpacity style={styles.editProfileButton}
+                            onPress={()=> {navigation.navigate('Upload Art Piece')}}
+                        >
+                            <Text style>Upload new art piece</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.LogOutButton}
+                            //onPress={}
+                        >
+                            <Text style>Place uploaded image for sell</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
-                <View id="ArtistNameBarContainer" style={styles.ArtistNameBarContainer}>
-                    <Text>{userDisplayName}</Text>
-                    <View id="LineUnderArtistName" style={styles.LineUnderArtistName}></View>
-                </View>
-                <View id="TopButtonContainer" style={styles.TopButtonContainer}>
-                    <TouchableOpacity style={styles.editProfileButton}
-                        onPress={()=> {navigation.navigate('Upload Art Piece')}}
-                    >
-                        <Text style>Upload new art piece</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.LogOutButton}
-                        //onPress={}
-                    >
-                        <Text style>Place uploaded image for sell</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+                <ImagesPreviewComponent/>
+            </ScrollView>
         )
     } else {
         return( //this should never happen, but is placed here just in case
@@ -112,13 +116,12 @@ function MyProfileScreen({navigation}) {
 }
 
 const styles = StyleSheet.create({
-    container: {
+    userInfoContainer: {
         flex: 1,
         width: "100%",
         alignItems: 'center',
         backgroundColor: 'lightblue'
     },
-    
     TopButtonContainer:{
     width: '100%',
     flexDirection: "row"

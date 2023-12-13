@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Dimensions, ScrollView } from "react-native";
 import { StyleSheet, Text, View, TouchableOpacity, Image, TextInput, Alert} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 //firebase importation
 import { getApp } from "firebase/app";
@@ -35,7 +36,6 @@ function UploadArtPieceScreen() {
     const [heightDimensionCM, SetHeightDimensionCM] = useState(null) //CM stands for centimeter
     const [customText, SetCustomText] = useState(null)
     const [image, SetImage] = useState(null) //this state uses the whole image information, rather than just the URI/URL, because som of the attached metadata is used in calculations
-    const [imageMetaData, SetImageMetaData] = useState(null)
     const [uploading, SetUploading] = useState(false)
     
     //start of calculations used to make sure that the chosen image retains it's aspect ratio while remaining as large as possible (so that it's easier to see)
@@ -49,38 +49,27 @@ function UploadArtPieceScreen() {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [4, 3],
+            //aspect: [4, 3],
             quality: 1,
         });
 
         console.log(result);
-        console.log(result.assets[0].uri)
-        let InputMetaData = {
-            contentType: result.assets[0].type,
-            artPieceTitle: artPieceTitle,
-            lengthDimension: lengthDimensionCM,
-            heightDimension: heightDimensionCM,
-            customText: customText
-        }
         
         if(!result.canceled){
             console.log('you got even further this time!')
             SetImage(result)
-            SetImageMetaData(InputMetaData)
-            //console.log('ImageMetaData here: ' + imageMetaData)
             const ratio = win.width/result.assets[0].height
             console.log("the image ratio is: " + ratio)
             setImageRatio(ratio)
         }
     }
-    //
+
     uploadImageAndInfo = async () => { //this function as well as the uploadImageAsync function have been plucked from this example code provided by expo: https://github.com/expo/examples/blob/master/with-firebase-storage-upload/App.js#L193
         if(artPieceTitle === null || lengthDimensionCM === null || heightDimensionCM === null || customText === null){
             Alert.alert('In order to upload, you must first provide the necessary information about your artpiece')
-
         } else {
             try {
-                let firebaseStorageArtPieceRef = ref(firebaseStorage, `artistData/${user.uid}/artPieces/${artPieceTitle}PaintingOwner${user.uid}`)//this will be the pathName Of The Art Piece Inside The Firebase storage bucket, this must be dynamic
+                let firebaseStorageArtPieceRef = ref(firebaseStorage, `artistData/${user.uid}/artPieces/${artPieceTitle}PaintingUploadedBy${user.uid}`)//this will be the pathName Of The Art Piece Inside The Firebase storage bucket, this must be dynamic
                 SetUploading(true)
                 const downloadUrl = await uploadImageAsync(image.uri, firebaseStorageArtPieceRef); //this triggers the uploadImageAsync function which uploads the chosen image. This function is async, as we need the uploadURL later inorder to store the URL with the other information stored in firestore
                 console.log('downloadUrl', downloadUrl)
@@ -112,8 +101,9 @@ function UploadArtPieceScreen() {
                 xhr.open("GET", uri, true);
                 xhr.send(null);
             });
-
-            const result = await uploadBytes(firebaseStorageArtPieceRef, blob, imageMetaData);
+            
+            const metaData = {contentType: "image"} //this tells Firebase storage that an image has been uploaded
+            const result = await uploadBytes(firebaseStorageArtPieceRef, blob, metaData);
     
             // We're done with the blob, close and release it
             blob.close();
@@ -125,7 +115,7 @@ function UploadArtPieceScreen() {
     }
 
     async function uploadArtPieceDocToFirestore(downloadURL, firebaseStorageArtPieceRef){//this function creates a document, with all of the relevant artPiece information, onto the firestore database, 
-        const artPieceFirestoreRef = `artPieces/${artPieceTitle}PaintingOwner${user.uid}`
+        const artPieceFirestoreRef = `artPieces/${artPieceTitle}PaintingUploadedBy${user.uid}`
         const userFirestoreRef = doc(firebaseDB, `Users/${user.uid}`)
         await setDoc(doc(firebaseDB, artPieceFirestoreRef), {
             artPieceTitle: artPieceTitle,
@@ -194,7 +184,6 @@ function UploadArtPieceScreen() {
                     </Text>
                 </TouchableOpacity>
             }
-            
         </View>
     </ScrollView>
     )
