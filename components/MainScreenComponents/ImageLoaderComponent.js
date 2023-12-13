@@ -1,7 +1,10 @@
 import React from "react";
 import { useState } from "react";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import { StyleSheet, Text, View, Image, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Image, Dimensions, ImageBackground } from 'react-native';
+
+import { getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getStorage, ref, uploadBytes, getDownloadURL} from "firebase/storage";
 
 /*
             const ratio = win.width/result.assets[0].height
@@ -9,13 +12,15 @@ import { StyleSheet, Text, View, Image, Dimensions } from 'react-native';
             setImageRatio(ratio)
             */
 
-function ImageLoaderComponent({imageDownLoadURL}) {
-    const [imageRatio, setImageRatio] = useState(null)
-    win = Dimensions.get('window')
-            
+function ImageLoaderComponent({props}) {
+    let artistdata = props.artistdata
+    let artistIndex = props.artistIndex
+    let artPieceData = props.artPieceData
+    let artistImageIndex = props.artistImageIndex
+   
     return(
         <View style={styles.container}>
-            <Image style={styles.picture} source={{uri: imageDownLoadURL}}/>
+            <ImageBackground style={styles.picture} source={{uri: artPieceData[artistImageIndex].downloadURL}}/>
         </View>
     )
 }
