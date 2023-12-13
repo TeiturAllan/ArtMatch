@@ -99,7 +99,7 @@ function MyProfileScreen({navigation}) {
                         <TouchableOpacity style={styles.LogOutButton}
                             //onPress={}
                         >
-                            <Text style>Place uploaded image for sell</Text>
+                            <Text style>Place uploaded image for sale</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

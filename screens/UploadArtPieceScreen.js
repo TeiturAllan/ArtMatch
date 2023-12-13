@@ -115,9 +115,9 @@ function UploadArtPieceScreen() {
     }
 
     async function uploadArtPieceDocToFirestore(downloadURL, firebaseStorageArtPieceRef){//this function creates a document, with all of the relevant artPiece information, onto the firestore database, 
-        const artPieceFirestoreRef = `artPieces/${artPieceTitle}PaintingUploadedBy${user.uid}`
+        const artPieceFirestoreRef = `${artPieceTitle}PaintingUploadedBy${user.uid}`
         const userFirestoreRef = doc(firebaseDB, `Users/${user.uid}`)
-        await setDoc(doc(firebaseDB, artPieceFirestoreRef), {
+        await setDoc(doc(firebaseDB, "artPieces", artPieceFirestoreRef), {
             artPieceTitle: artPieceTitle,
             dimensions: {
                 length: lengthDimensionCM,
@@ -128,6 +128,7 @@ function UploadArtPieceScreen() {
             downloadURL: downloadURL,
             firebaseStorageArtPieceRef: `${firebaseStorageArtPieceRef}`
         })
+        console.log(artPieceFirestoreRef)
         await updateDoc(userFirestoreRef, {
             artPiecesUploaded: arrayUnion(`${artPieceFirestoreRef}`)
         }).then(Alert.alert('Your Art Piece has succesfully been uploaded'))

@@ -39,15 +39,13 @@ function ImagesPreviewComponent() {
         
         setData(resp)
         setLoading(false)
-        renderItem(resp)//this sends the queried data to the render item function, which will eventually tell the component what to render
     }
 
     const renderItem = (data) => { //this function renders what will be shown after the data has been returned from the database
         dataInArray = []
-        console.log('start of console.loggin')
         data.forEach((doc) => {
-            console.log('documentStart')
-            console.log(doc.id, "=>", doc.data());
+            //console.log('documentStart')
+            //console.log(doc.id, "=>", doc.data());
             docResult = doc.data()
             dataInArray.push(docResult)
         })
@@ -102,8 +100,6 @@ const styles = StyleSheet.create({
         artPieceFrame: {
             width: "40%",
             height: 150,
-            borderWidth: 1,
-
             overflow:"hidden",
             backgroundColor: "lightblue"
         },
