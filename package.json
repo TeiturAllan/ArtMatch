@@ -10,16 +10,17 @@
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^6.5.11",
+    "@react-navigation/material-top-tabs": "^6.6.5",
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/native-stack": "^6.9.17",
     "expo": "~49.0.15",
+    "expo-image-manipulator": "~11.3.0",
+    "expo-image-picker": "~14.3.2",
     "expo-status-bar": "~1.6.0",
     "firebase": "^10.7.1",
     "react": "18.2.0",
     "react-native": "0.72.6",
-    "react-native-paper": "^5.11.3",
-    "expo-image-picker": "~14.3.2",
-    "expo-image-manipulator": "~11.3.0"
+    "react-native-paper": "^5.11.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

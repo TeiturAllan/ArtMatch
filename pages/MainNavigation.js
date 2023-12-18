@@ -13,6 +13,7 @@ const Stack = createBottomTabNavigator();
 const Tab = createBottomTabNavigator();
 
 //import of screens
+import LikedNavigation from "../screens/LikedScreen"; <LikedNavigation/>
 import LikedArtistScreen from "../screens/LikedArtistScreen"; <LikedArtistScreen/>
 import LikedArtPieceScreen from "../screens/LikedArtPieceScreen"; <LikedArtPieceScreen/>
 import MainScreen from "../screens/MainScreen"; <MainScreen/>
@@ -33,8 +34,8 @@ function MainNavigationPage() {
                 component={MainScreen}
                 options={{headerShown: false}}/>
 
-                <Tab.Screen name="LikedArtist"
-                component={LikedArtistScreen}
+                <Tab.Screen name="Liked"
+                component={LikedNavigation}
                 /*options={{headerShown: false}}*//>
 
                 <Tab.Screen name="Settings"

@@ -36,7 +36,7 @@ function EditProfileScreen() {
         });
 
         await updateDoc(userFirestoreRef, {//this updates the user on the firestore database, this update is more important
-          userIsPublic: userIsPublic, artistName: displayName
+          userIsPublic: userIsPublic, artistName: displayName, profilePicURL: profilePicURL
         }).then(() => {
           Alert.alert('Your Profile Has Been Updated')                
         }).catch((error) => {

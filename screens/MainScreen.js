@@ -32,7 +32,7 @@ function MainScreen() {
         //const artPieceQuery = query(collection(firebaseDB, "artPieces"), where("uploaderUID", "==", data[artistIndex].uid))
     //end of importations of methods from firebase
 
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);//this variable is used to indicate when the needed data has been fetched from the firestore database. when this variable is set to false, then the page will load
     const [artistIndex, setArtistIndex] = useState(0)
     const [artistImageIndex, setArtistImageIndex] = useState(0)
 
