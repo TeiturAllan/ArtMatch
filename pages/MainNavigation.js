@@ -36,7 +36,7 @@ function MainNavigationPage() {
 
                 <Tab.Screen name="Liked"
                 component={LikedNavigation}
-                /*options={{headerShown: false}}*//>
+                options={{headerShown: false}}/>
 
                 <Tab.Screen name="Settings"
                 component={SettingsScreen}

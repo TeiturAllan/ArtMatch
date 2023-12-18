@@ -13,7 +13,6 @@ import { getApp } from "firebase/app";
 
 
 function LikedArtistScreen() {
-    const isFocused = useIsFocused();
     const firebaseApp = getApp()
         //importing user information, so that i can register who uploaded the image/art piece
         const auth = getAuth()
@@ -54,10 +53,11 @@ function LikedArtistScreen() {
     }
 
     function renderPage(artistsArray){
-        console.log('renderPage has started')
+        //console.log('renderPage has started')
         console.log(likedArtistsInAnArray)
         return(
             <SafeAreaView>
+                <Text>find a way to reload this after an artist has been liked</Text>
                 {artistsArray.map((item, index)=> (
                     <View style={styles.likedArtistContainer} key={index}>
                     <TouchableOpacity  style={styles.ArtistsProfilePicFrame}>
@@ -72,23 +72,17 @@ function LikedArtistScreen() {
         )
     }
 
-    if(isFocused === true){
+    
         return(//this return function is the actual loading of the page
-        <SafeAreaView>
+        <ScrollView>
             <StatusBar
             style= {hidden=false}
             />
             {loading &&  <Text style={{justifyContent: "center"}}>data is being loaded from the database</Text>}
             {!loading && renderPage(likedArtistsData)}          
-        </SafeAreaView>//the renderPage function fires as soon as the loading variable is set to false. the renderPage actually contains all of the main page functionality
+        </ScrollView>//the renderPage function fires as soon as the loading variable is set to false. the renderPage actually contains all of the main page functionality
     )
-    } else {
-        return( //this should never happen, but is placed here just in case
-            <View>
-                <Text>something went wrong</Text>
-            </View>
-        )
-    }
+    
 }
 
 const styles = StyleSheet.create({

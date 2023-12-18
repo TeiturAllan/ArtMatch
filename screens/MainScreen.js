@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { NavigationContainer, useIsFocused } from '@react-navigation/native';
-import { StyleSheet, Text, View, Image, SafeAreaView, TouchableOpacity, Dimensions, ScrollView, StatusBar, ImageBackground} from 'react-native';
+import { StyleSheet, Text, View, Image, SafeAreaView, TouchableOpacity, Dimensions, ScrollView, StatusBar, ImageBackground, Alert} from 'react-native';
 
 //firebase imports
 import { getApp } from "firebase/app";
@@ -130,11 +130,12 @@ function MainScreen() {
                         <View style={styles.buttonContainer}>
                             <TouchableOpacity style={styles.button}
                             onPress={()=>{
-                                likeArtist(artistdata[artistIndex].userID)
+                                dislikeArtist(artistdata[artistIndex].userID)
                             }}>
                                 <Text>Dislike Artist</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.button} onPress={()=> {
+                                likeArtPiece(artPieceData[artistImageIndex], artistdata[artistIndex].userID)
                                 console.log('you have pressed the "like art piece button"')
                             }}>
                                 <Text>Like Art Piece</Text>
@@ -156,6 +157,21 @@ function MainScreen() {
 
     //start of onClick functions
 
+    async function dislikeArtist(artistUserID){
+        //updates the artistIndex by using the setArtistIndex() method. This updates the page so that a new artist and artPieces are shown on screen.
+            let oldArtistIndex = artistIndex
+            let newArtistIndex = oldArtistIndex + 1
+            setArtistIndex(newArtistIndex)
+        
+        //changes the artistImageIndex to 0 by using the setArtistImageIndex, so that the artist's first image is loaded. 
+            let newArtistImageIndex = 0
+            setArtistImageIndex(newArtistImageIndex)
+
+        await fetchArtPieceData(artistData, newArtistIndex).then(renderPage())
+    }
+
+
+
     async function likeArtist(artistUserID){
         //updates the artistIndex by using the setArtistIndex() method. This updates the page so that a new artist and artPieces are shown on screen.
             let oldArtistIndex = artistIndex
@@ -171,7 +187,7 @@ function MainScreen() {
             updateDoc(authenticatedUserDocumentRef, {
                 likedArtists: arrayUnion(`${artistUserID}`)
             })
-        //adds the authenticated users id to the liked artists page. this is used mainly for optimizing querying, but might be used later to show how many followers the artist has
+        //adds the authenticated users id to the liked artists firestore document. this is used mainly for optimizing querying, but might be used later to show how many followers the artist has
             const likedArtistDocumentRef = doc(firebaseDB, `Users/${artistUserID}`)
             updateDoc(likedArtistDocumentRef, {
                 likedBy: arrayUnion(`${user.uid}`)//user = firebaseAuth.currentUser. this is defined on line 25
@@ -179,18 +195,24 @@ function MainScreen() {
         await fetchArtPieceData(artistData, newArtistIndex).then(renderPage())
     }
 
-    async function dislikeArtist(artistUserID){
-        //updates the artistIndex by using the setArtistIndex() method. This updates the page so that a new artist and artPieces are shown on screen.
-            let oldArtistIndex = artistIndex
-            let newArtistIndex = oldArtistIndex + 1
-            setArtistIndex(newArtistIndex)
-        
-        //changes the artistImageIndex to 0 by using the setArtistImageIndex, so that the artist's first image is loaded. 
-            let newArtistImageIndex = 0
-            setArtistImageIndex(newArtistImageIndex)
 
-        await fetchArtPieceData(artistData, newArtistIndex).then(renderPage())
+
+    function likeArtPiece(artPiece, artistUserID){
+        //adds the liked art piece to an array on the users firestore document, so that it is possible to keep track of which art piece the user has liked
+            const authenticatedUserDocumentRef = doc(firebaseDB, `Users/${user.uid}`)//user = firebaseAuth.currentUser. this is defined on line 25
+            console.log(`Users/${user.uid}`)
+            updateDoc(authenticatedUserDocumentRef, {
+                likedArtPiece: arrayUnion(`artPieces/${artPiece.artPieceTitle}PaintingUploadedBy${artistUserID}`)
+            })
+
+        //adds the authenticated users userID to the liked art piece's firestore document. this is used mainly for optimizing querying, but might be used later to show how many likes the art piece has
+        const likedArtPieceDocumentRef = doc(firebaseDB, `artPieces/${artPiece.artPieceTitle}PaintingUploadedBy${artistUserID}`)
+        updateDoc(likedArtPieceDocumentRef, {
+            likedBy: arrayUnion(`${user.uid}`)//user = firebaseAuth.currentUser. this is defined on line 25
+        })
+        Alert.alert('Art Piece has been liked')
     }
+    
 
 
     return(//this return function is the actual loading of the page
