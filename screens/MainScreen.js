@@ -10,11 +10,11 @@ import { getApp } from "firebase/app";
     //import for firebase storage
         import { getStorage, ref, uploadBytes, getDownloadURL} from "firebase/storage";
     //imports for cloud firestore (database)
-        import { getFirestore, doc, getDocs, query, where, collection, limit, getDoc, Query  } from "firebase/firestore";
+        import { getFirestore, doc, getDocs, query, where, collection, limit, getDoc, Query, updateDoc, arrayUnion  } from "firebase/firestore";
 
 //import of components
-import ImageLoaderComponent from "../components/MainScreenComponents/ImageLoaderComponent"; <ImageLoaderComponent/>
-import InformationContainerComponent from "../components/MainScreenComponents/InformationContainerComponent"; <InformationContainerComponent/>
+import ImageLoaderComponent from "../components/MainScreenComponents/ImageLoaderComponent"; <ImageLoaderComponent/>//this component is currently not used
+import InformationContainerComponent from "../components/MainScreenComponents/InformationContainerComponent"; <InformationContainerComponent/>//this component is currently not used 
 
 
 function MainScreen() {
@@ -45,7 +45,7 @@ function MainScreen() {
     const win = Dimensions.get('window')
     //console.log(win.width)
 
-    useEffect(()=> {
+    useEffect(()=> {//this function fires as soon as the page starts. it starts the sequence that is needed for the page to load properly
         fetchArtistData(artistQuery);
     }, [])
 
@@ -58,6 +58,7 @@ function MainScreen() {
             docResult = doc.data()
             dataInArray.push(docResult)
         })
+        
         setArtistData(dataInArray)
         
         await fetchArtPieceData(dataInArray, artistIndex).then(renderPage())
@@ -65,37 +66,28 @@ function MainScreen() {
         //renderItem(resp)//this sends the queried data to the render item function, which will eventually tell the component what to render
     }
 
-    const fetchArtPieceData = async(artistData, artistIndex) => {//this function sets the artPieceData variable/state to an array containing all of the artwork of the active artist
+    const fetchArtPieceData = async(artistDataToFetch, artistIndexToFetch) => {//this function sets the artPieceData variable/state to an array containing all of the artwork of the active artist
         const artPieceArray = []
-        q = query(collection(firebaseDB, "artPieces"), where("uploaderUID", "==", `${artistData[artistIndex].userID}`))
-        console.log('fetchArtPieceData has started')
-        
+        q = query(collection(firebaseDB, "artPieces"), where("uploaderUID", "==", `${artistDataToFetch[artistIndexToFetch].userID}`)) //this gives the typeError "cannot convert undefined value to object". i do not know how to fix this error as the I am using the method provided in the firestore docs
         const querySnapsot = await getDocs(q)
         querySnapsot.forEach((doc)=> {
-            console.log('documentStart')
+            //console.log('documentStart')
             docResult = doc.data()
-            console.log(docResult)
+            //console.log(docResult)
             artPieceArray.push(docResult)
         })
-        console.log('artPieceArray from fetch function', artPieceArray)
         setArtPieceData(artPieceArray)
         setLoading(false)
     }
 
+
     
     function renderPage(artistdata, artistIndex, artPieceData, artistImageIndex){
-        //console.log('renderPage has been called')
-        let props = {
-            artistdata: artistdata,
-            artistIndex: artistIndex,
-            artPieceData: artPieceData,
-            artistImageIndex: artistImageIndex,
-        }
-        
+        //console.log('renderPage has been called')        
         return(
             <View style={styles.container}>
                 <View style={styles.ImageNavigationShadowsContainer}>
-                    <ImageBackground style={styles.picture} source={{uri: artPieceData[artistImageIndex].downloadURL}}>
+                    <ImageBackground style={styles.picture} resizeMode="contain"source={{uri: artPieceData[artistImageIndex].downloadURL}}>
                         <TouchableOpacity style={styles.ImageNavigationShadows}
                             onPress={() => {
                                 let oldIndex = artistImageIndex
@@ -105,7 +97,6 @@ function MainScreen() {
                                 } else {
                                     let newIndex = artistImageIndex - 1
                                     setArtistImageIndex(newIndex)
-                                    console.log(artistImageIndex)
                                 }
                         }}>
                         </TouchableOpacity>
@@ -125,28 +116,91 @@ function MainScreen() {
                         </TouchableOpacity>
                     </ImageBackground>
                 </View>
-                <InformationContainerComponent props={props}/>
+                <View style={[styles.container, {backgroundColor : "yellow"}]}>  
+                    <View style={styles.artPieceInfoContainer}>
+                        <View style={styles.artistNameContainer}>
+                            <Text style={styles.artistName}>{artistdata[artistIndex].artistName} </Text>
+                        </View>
+                        <View>
+                            <Text>art piece name: {artPieceData[artistImageIndex].artPieceTitle}</Text>
+                            <Text>Dimensions: {artPieceData[artistImageIndex].dimensions.height}cm x {artPieceData[artistImageIndex].dimensions.length}cm </Text>
+                        </View>
+
+                        <Text>these buttons will probably be moved, so that they are on the other page</Text>
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity style={styles.button}
+                            onPress={()=>{
+                                dislikeArtist(artistdata[artistIndex].userID)
+                            }}>
+                                <Text>Dislike Artist</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.button} onPress={()=> {
+                                console.log('you have pressed the "like art piece button"')
+                            }}>
+                                <Text>Like Art Piece</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.button} onPress={()=>{
+                                likeArtist(artistdata[artistIndex].userID)
+                            }}>
+                                <Text>Like Artist</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
             </View>
         )
     }
+    //end of functions that are used to render the page 
 
-    return(
+
+
+    //start of onClick functions
+
+    async function likeArtist(artistUserID){
+        //updates the artistIndex by using the setArtistIndex() method. This updates the page so that a new artist and artPieces are shown on screen.
+            let oldArtistIndex = artistIndex
+            let newArtistIndex = oldArtistIndex + 1
+            setArtistIndex(newArtistIndex)
+        
+        //changes the artistImageIndex to 0 by using the setArtistImageIndex, so that the artist's first image is loaded. 
+            let newArtistImageIndex = 0
+            setArtistImageIndex(newArtistImageIndex)
+
+        //adds the liked artist to an array (in the authenticated user's document on firestore DB), so that users can keep track of which artists they have liked.
+            const authenticatedUserDocumentRef = doc(firebaseDB, `Users/${user.uid}`)//user = firebaseAuth.currentUser. this is defined on line 25
+            console.log("liked artist UserID: ",artistUserID)
+            updateDoc(authenticatedUserDocumentRef, {
+                likedArtists: arrayUnion(`${artistUserID}`)
+            })
+        await fetchArtPieceData(artistData, newArtistIndex).then(renderPage())
+    }
+
+    async function dislikeArtist(artistUserID){
+        //updates the artistIndex by using the setArtistIndex() method. This updates the page so that a new artist and artPieces are shown on screen.
+            let oldArtistIndex = artistIndex
+            let newArtistIndex = oldArtistIndex + 1
+            setArtistIndex(newArtistIndex)
+        
+        //changes the artistImageIndex to 0 by using the setArtistImageIndex, so that the artist's first image is loaded. 
+            let newArtistImageIndex = 0
+            setArtistImageIndex(newArtistImageIndex)
+
+        await fetchArtPieceData(artistData, newArtistIndex).then(renderPage())
+    }
+
+
+    return(//this return function is the actual loading of the page
         <SafeAreaView>
             <StatusBar
             style= {hidden=false}
             />
             {loading &&  <Text style={{justifyContent: "center"}}>data is being loaded from the database</Text>}
-            {!loading && renderPage(artistData, artistIndex, artPieceData, artistImageIndex)}           
-        </SafeAreaView>
+            {!loading && renderPage(artistData, artistIndex, artPieceData, artistImageIndex)}          
+        </SafeAreaView>//the renderPage function fires as soon as the loading variable is set to false. the renderPage actually contains all of the main page functionality
     )
     
 }
 
-/*{artPieceData && <ImageLoaderComponent imageDownLoadURL={artPieceData[artistImageIndex].downloadURL}/>}
-            {artistData && <InformationContainerComponent props={InformationContainerComponentProps}/>}*/
-
-
-//Image style={styles.picture} source={{uri: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/bc/Old_guitarist_chicago.jpg/270px-Old_guitarist_chicago.jpg'}}/>
 const styles = StyleSheet.create({
     
     container: {
@@ -157,8 +211,9 @@ const styles = StyleSheet.create({
     },
     ImageNavigationShadowsContainer:{ 
         width: "100%",
-        height: "80%",
-        overflow:"hidden"
+        height: "75%",
+        overflow:"hidden",
+        resizeMode: "contain"
         
     },
     picture: {
@@ -170,8 +225,6 @@ const styles = StyleSheet.create({
     ImageNavigationShadows:{
         width:"50%",
         height:"100%",
-        
-
     },
     ImageNavigationButtonContainer:{
         backgroundColor: "red",
@@ -203,7 +256,7 @@ const styles = StyleSheet.create({
                 },
             artPieceInfo: {
                 width: "100%",
-                height: "60%",
+                height: "80%",
                 backgroundColor: "yellow",
             },
             buttonContainer:{
@@ -211,7 +264,7 @@ const styles = StyleSheet.create({
                 width: "100%",
                 height: "20%",
                 flexDirection: "row",
-                justifyContent: "center",
+                justifyContent: "space-evenly",
                 alignContent: "space-around",
                 alignSelf: "flex-end",
                 position: "absolute",
@@ -221,9 +274,10 @@ const styles = StyleSheet.create({
                     backgroundColor: '#0a5da6',
                     width: '30%',
                     padding: 5,
-                    marginBottom: 5,
+                    marginBottom: 0,
                     borderRadius: 10,
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    justifyContent: "space-evenly"
                 },
   });
 export default MainScreen

@@ -1,3 +1,6 @@
+//THIS COMPONENT IS CURRENTLY NOT USED.
+
+
 import React from "react";
 import { useState } from "react";
 import { StyleSheet, Text, View, Image, Dimensions, ImageBackground } from 'react-native';

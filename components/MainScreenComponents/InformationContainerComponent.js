@@ -1,3 +1,5 @@
+//THIS COMPONENT IS CURRENTLY NOT BEING USED
+
 import React from "react";
 import { useState } from "react";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
@@ -36,7 +38,10 @@ function InformationContainerComponent({props}) {
                             <TouchableOpacity style={styles.button}>
                                 <Text>Like Art Piece</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.button}>
+                            <TouchableOpacity style={styles.button} onPress={()=>{
+                                console.log(artistIndex)
+                                console.log('new index: ', artistIndex)
+                            }}>
                                 <Text>Like Artist</Text>
                             </TouchableOpacity>
                         </View>
