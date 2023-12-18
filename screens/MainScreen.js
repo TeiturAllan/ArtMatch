@@ -130,7 +130,7 @@ function MainScreen() {
                         <View style={styles.buttonContainer}>
                             <TouchableOpacity style={styles.button}
                             onPress={()=>{
-                                dislikeArtist(artistdata[artistIndex].userID)
+                                likeArtist(artistdata[artistIndex].userID)
                             }}>
                                 <Text>Dislike Artist</Text>
                             </TouchableOpacity>
@@ -168,9 +168,13 @@ function MainScreen() {
 
         //adds the liked artist to an array (in the authenticated user's document on firestore DB), so that users can keep track of which artists they have liked.
             const authenticatedUserDocumentRef = doc(firebaseDB, `Users/${user.uid}`)//user = firebaseAuth.currentUser. this is defined on line 25
-            console.log("liked artist UserID: ",artistUserID)
             updateDoc(authenticatedUserDocumentRef, {
                 likedArtists: arrayUnion(`${artistUserID}`)
+            })
+        //adds the authenticated users id to the liked artists page. this is used mainly for optimizing querying, but might be used later to show how many followers the artist has
+            const likedArtistDocumentRef = doc(firebaseDB, `Users/${artistUserID}`)
+            updateDoc(likedArtistDocumentRef, {
+                likedBy: arrayUnion(`${user.uid}`)//user = firebaseAuth.currentUser. this is defined on line 25
             })
         await fetchArtPieceData(artistData, newArtistIndex).then(renderPage())
     }
