@@ -116,7 +116,26 @@ function MainScreen() {
                         </TouchableOpacity>
                     </ImageBackground>
                 </View>
-                <View style={[styles.container, {backgroundColor : "yellow"}]}>  
+                <View style={[styles.nonImageContainer]}>  
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity style={styles.button}
+                        onPress={()=>{
+                            dislikeArtist(artistdata[artistIndex].userID)
+                        }}>
+                            <Text>Dislike Artist</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.button} onPress={()=> {
+                            likeArtPiece(artPieceData[artistImageIndex], artistdata[artistIndex].userID)
+                            console.log('you have pressed the "like art piece button"')
+                        }}>
+                            <Text>Like Art Piece</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.button} onPress={()=>{
+                            likeArtist(artistdata[artistIndex].userID)
+                        }}>
+                            <Text>Like Artist</Text>
+                        </TouchableOpacity>
+                    </View>
                     <View style={styles.artPieceInfoContainer}>
                         <View style={styles.artistNameContainer}>
                             <Text style={styles.artistName}>{artistdata[artistIndex].artistName} </Text>
@@ -124,28 +143,14 @@ function MainScreen() {
                         <View>
                             <Text>art piece name: {artPieceData[artistImageIndex].artPieceTitle}</Text>
                             <Text>Dimensions: {artPieceData[artistImageIndex].dimensions.height}cm x {artPieceData[artistImageIndex].dimensions.length}cm </Text>
-                        </View>
-
-                        <Text>these buttons will probably be moved, so that they are on the other page</Text>
-                        <View style={styles.buttonContainer}>
-                            <TouchableOpacity style={styles.button}
-                            onPress={()=>{
-                                dislikeArtist(artistdata[artistIndex].userID)
-                            }}>
-                                <Text>Dislike Artist</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.button} onPress={()=> {
-                                likeArtPiece(artPieceData[artistImageIndex], artistdata[artistIndex].userID)
-                                console.log('you have pressed the "like art piece button"')
-                            }}>
-                                <Text>Like Art Piece</Text>
-                            </TouchableOpacity>
+                            <Text>Sales Price: {artPieceData[artistImageIndex].price}</Text>
                             <TouchableOpacity style={styles.button} onPress={()=>{
-                                likeArtist(artistdata[artistIndex].userID)
+                                console.log('implement functionality here')
                             }}>
-                                <Text>Like Artist</Text>
-                            </TouchableOpacity>
+                            <Text>Buy art piece</Text>
+                        </TouchableOpacity>
                         </View>
+                         
                     </View>
                 </View>
             </View>
@@ -261,49 +266,54 @@ const styles = StyleSheet.create({
         alignContent: "space-around",
 
     },
-        artPieceInfoContainer: {
+        nonImageContainer:{
+            backgroundColor: "grey",
+            overflow: "hidden",
+            width: "100%",
+            height: "25%",
+        },
+        buttonContainer:{
+            
             width: "100%",
             height: "20%",
+            flexDirection: "row",
+            justifyContent: "space-evenly",
+            alignContent: "space-around",
+            
+        },
+            button:{
+                backgroundColor: '#0a5da6',
+                width: '30%',
+                padding: 5,
+                marginBottom: 0,
+                borderRadius: 10,
+                alignItems: 'center',
+                justifyContent: "space-evenly"
+            },
+        artPieceInfoContainer: {
+            backgroundColor:"yellow",
+            width: "100%",
+            height: "80%",
             flexDirection: "column",
-            flexWrap: "wrap",
-            justifyContent: "flex-start",
+            
         },
             artistNameContainer: {
                 height: "15%",
                 width: "100%",
-                
+                backgroundColor:"black"
             },
                 artistName:{
                     width: "100%",
                     height: "100%",
-                    backgroundColor: "green",
                     textAlign: "center",
-                    textAlignVertical: "center"
+                    textAlignVertical: "center",
+                    color: "white"
                 },
             artPieceInfo: {
                 width: "100%",
                 height: "80%",
                 backgroundColor: "yellow",
             },
-            buttonContainer:{
-                backgroundColor: "red",
-                width: "100%",
-                height: "20%",
-                flexDirection: "row",
-                justifyContent: "space-evenly",
-                alignContent: "space-around",
-                alignSelf: "flex-end",
-                position: "absolute",
-                bottom: 0
-            },
-                button:{
-                    backgroundColor: '#0a5da6',
-                    width: '30%',
-                    padding: 5,
-                    marginBottom: 0,
-                    borderRadius: 10,
-                    alignItems: 'center',
-                    justifyContent: "space-evenly"
-                },
+            
   });
 export default MainScreen
