@@ -10,7 +10,7 @@ import { getApp } from "firebase/app";
     //import for firebase storage
         import { getStorage, ref, uploadBytes, getDownloadURL} from "firebase/storage";
     //imports for cloud firestore (database)
-        import { getFirestore, doc, getDocs, query, where, collection, limit, getDoc, Query, updateDoc, arrayUnion  } from "firebase/firestore";
+        import { getFirestore, doc, getDocs, query, where, collection, limit, getDoc, Query, updateDoc, arrayUnion, setDoc, addDoc  } from "firebase/firestore";
 
 //import of components
 import ImageLoaderComponent from "../components/MainScreenComponents/ImageLoaderComponent"; <ImageLoaderComponent/>//this component is currently not used
@@ -39,7 +39,7 @@ function MainScreen() {
     //const [currentArtistArtPiecesQuery, setCurrentArtistArtPiecesQuery] = useState(null)
     const [artistData, setArtistData] = useState([]);
     const [artPieceData, setArtPieceData] = useState([])
-    
+    const [activeArtPieceForSaleStatus, setActiveArtPieceForSaleStatus] = useState(true)
 
 
     const win = Dimensions.get('window')
@@ -78,11 +78,13 @@ function MainScreen() {
         })
         setArtPieceData(artPieceArray)
         setLoading(false)
+        setActiveArtPieceForSaleStatus(artPieceArray[0].forSale)
     }
 
 
     
     function renderPage(artistdata, artistIndex, artPieceData, artistImageIndex){
+        
         //console.log('renderPage has been called')        
         return(
             <View style={styles.container}>
@@ -97,6 +99,7 @@ function MainScreen() {
                                 } else {
                                     let newIndex = artistImageIndex - 1
                                     setArtistImageIndex(newIndex)
+                                    setActiveArtPieceForSaleStatus(artPieceData[newIndex].forSale)
                                 }
                         }}>
                         </TouchableOpacity>
@@ -111,6 +114,7 @@ function MainScreen() {
                                     let newIndex = artistImageIndex + 1
                                     setArtistImageIndex(newIndex)
                                     console.log(artistImageIndex)
+                                    setActiveArtPieceForSaleStatus(artPieceData[newIndex].forSale)
                                 }
                             }}> 
                         </TouchableOpacity>
@@ -118,37 +122,46 @@ function MainScreen() {
                 </View>
                 <View style={[styles.nonImageContainer]}>  
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={styles.button}
-                        onPress={()=>{
-                            dislikeArtist(artistdata[artistIndex].userID)
-                        }}>
-                            <Text>Dislike Artist</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.button} onPress={()=> {
-                            likeArtPiece(artPieceData[artistImageIndex], artistdata[artistIndex].userID)
-                            console.log('you have pressed the "like art piece button"')
-                        }}>
-                            <Text>Like Art Piece</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.button} onPress={()=>{
-                            likeArtist(artistdata[artistIndex].userID)
-                        }}>
-                            <Text>Like Artist</Text>
-                        </TouchableOpacity>
+                        <View style={styles.likeButtonContainer}>
+                            <TouchableOpacity style={styles.button}
+                            onPress={()=>{
+                                dislikeArtist(artistdata[artistIndex].userID)
+                            }}>
+                                <Text>Dislike Artist</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.button} onPress={()=> {
+                                likeArtPiece(artPieceData[artistImageIndex], artistdata[artistIndex].userID)
+                                console.log('you have pressed the "like art piece button"')
+                            }}>
+                                <Text>Like Art Piece</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.button} onPress={()=>{
+                                likeArtist(artistdata[artistIndex].userID)
+                            }}>
+                                <Text>Like Artist</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.BuyButtonContainer}>
+                            <TouchableOpacity style={styles.buyButton} onPress={()=>{
+                                    
+                                    createNotification(artistdata[artistIndex].userID, artPieceData[artistImageIndex].artPieceTitle, artPieceData[artistImageIndex].documentID)
+                                    Alert.alert(`A notification has been sent to ${artistdata[artistIndex].artistName}. The artist will contact you`)
+                                }}>
+                                <Text>{activeArtPieceForSaleStatus ? "Tell Artist that you are interested in buying" : "This art piece is currently not for sale"} </Text>
+                            </TouchableOpacity>
+                        </View>
+                        
                     </View>
+                    
                     <View style={styles.artPieceInfoContainer}>
                         <View style={styles.artistNameContainer}>
-                            <Text style={styles.artistName}>{artistdata[artistIndex].artistName} </Text>
+                            <Text style={styles.artistName}>"{artPieceData[artistImageIndex].artPieceTitle}" by {artistdata[artistIndex].artistName} </Text>
                         </View>
                         <View>
-                            <Text>art piece name: {artPieceData[artistImageIndex].artPieceTitle}</Text>
+                            <Text>{artPieceData[artistImageIndex].customText}</Text>
                             <Text>Dimensions: {artPieceData[artistImageIndex].dimensions.height}cm x {artPieceData[artistImageIndex].dimensions.length}cm </Text>
                             <Text>Sales Price: {artPieceData[artistImageIndex].price}</Text>
-                            <TouchableOpacity style={styles.button} onPress={()=>{
-                                console.log('implement functionality here')
-                            }}>
-                            <Text>Buy art piece</Text>
-                        </TouchableOpacity>
+                            
                         </View>
                          
                     </View>
@@ -218,6 +231,16 @@ function MainScreen() {
         Alert.alert('Art Piece has been liked')
     }
     
+    async function createNotification(uploaderUID, artPieceTitle, artPieceDocumentID){
+        console.log("uploaderUID: ", uploaderUID)
+        let firebaseStorageNotificationRef = ref(firebaseStorage, "notifications/")
+        await addDoc(collection(firebaseDB, "notifications"), {
+            sender: user.uid,
+            receiver: uploaderUID,
+            message: `${user.displayName} is interested in buying your art piece : ${artPieceTitle}. you can contact ${user.displayName} at this email: ${user.email}`,
+            artPieceDocumentID: artPieceDocumentID,b 
+        })
+    }
 
 
     return(//this return function is the actual loading of the page
@@ -267,31 +290,52 @@ const styles = StyleSheet.create({
 
     },
         nonImageContainer:{
-            backgroundColor: "grey",
             overflow: "hidden",
             width: "100%",
             height: "25%",
         },
         buttonContainer:{
-            
             width: "100%",
-            height: "20%",
-            flexDirection: "row",
-            justifyContent: "space-evenly",
-            alignContent: "space-around",
-            
-        },
-            button:{
+            height: "40%",
+            flexDirection: "column",
+            marginBottom: "2%"
+        },    
+            likeButtonContainer:{
+                width: "100%",
+                height: "40%",
+                flexDirection: "row",
+                justifyContent: "space-evenly",
+                alignContent: "space-around",
+                marginVertical: "2%"
+            },
+                button:{
+                    backgroundColor: '#0a5da6',
+                    width: '30%',
+                    padding: 5,
+                    marginBottom: 0,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    justifyContent: "space-evenly"
+                },
+            BuyButtonContainer:{    
+                width: "100%",
+                height: "40%",
+                flexDirection: "row",
+                justifyContent: "space-evenly",
+                alignContent: "space-around",
+                
+
+            },
+            buyButton:{
                 backgroundColor: '#0a5da6',
-                width: '30%',
+                width: '90%',
                 padding: 5,
                 marginBottom: 0,
                 borderRadius: 10,
                 alignItems: 'center',
-                justifyContent: "space-evenly"
+                justifyContent: "center"
             },
         artPieceInfoContainer: {
-            backgroundColor:"yellow",
             width: "100%",
             height: "80%",
             flexDirection: "column",
@@ -312,7 +356,6 @@ const styles = StyleSheet.create({
             artPieceInfo: {
                 width: "100%",
                 height: "80%",
-                backgroundColor: "yellow",
             },
             
   });

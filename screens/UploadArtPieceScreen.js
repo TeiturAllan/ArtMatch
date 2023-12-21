@@ -66,7 +66,7 @@ function UploadArtPieceScreen() {
     }
 
     uploadImageAndInfo = async () => { //this function as well as the uploadImageAsync function have been plucked from this example code provided by expo: https://github.com/expo/examples/blob/master/with-firebase-storage-upload/App.js#L193
-        if(artPieceTitle === null || lengthDimensionCM === null || heightDimensionCM === null || customText === null || price === null){
+        if(artPieceTitle === null || lengthDimensionCM === null || heightDimensionCM === null || customText === null){
             Alert.alert('In order to upload, you must first provide the necessary information about your artpiece')
         } else {
             try {
@@ -127,9 +127,9 @@ function UploadArtPieceScreen() {
             documentID: artPieceFirestoreRef,
             customText: customText,
             uploaderUID: user.uid,
-            price: price,
             downloadURL: downloadURL,
-            firebaseStorageArtPieceRef: `${firebaseStorageArtPieceRef}`
+            firebaseStorageArtPieceRef: `${firebaseStorageArtPieceRef}`,
+            forSale: false
         })
         console.log(artPieceFirestoreRef)
         await updateDoc(userFirestoreRef, {
@@ -168,12 +168,6 @@ function UploadArtPieceScreen() {
                 placeholder='Custom text, that will be shown alongside image'
                 value={customText}
                 onChangeText={text => SetCustomText(text)}
-                style={styles.customTextInput}
-              />
-              <TextInput 
-                placeholder='Sales price of art piece'
-                value={price}
-                onChangeText={text => price(text)}
                 style={styles.customTextInput}
               />
             </View>

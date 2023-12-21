@@ -2,17 +2,10 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { ScrollView, StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Image } from 'react-native';
 
-//firebase imports
-    import { getApp } from "firebase/app";
-    //import from firebase authentication
-        import { getAuth } from "firebase/auth";
-    //import for firebase storage
-        import { getStorage, ref, uploadBytes, getDownloadURL} from "firebase/storage";
-    //imports for cloud firestore (database)
-        import { getFirestore, doc, getDocs, query, where, collection } from "firebase/firestore";
 
 
-function ImagesPreviewComponent() {
+
+function ImagesPreviewComponent({navigation}) {
     
     //start of importation of methods from firebase
     const firebaseApp = getApp()
@@ -55,7 +48,7 @@ function ImagesPreviewComponent() {
             <SafeAreaView style={styles.artPieceList}>
                 {dataInArray.map((item, index) => (
                     <View style={styles.artPieceContainer} key={index}>
-                        <TouchableOpacity  style={styles.artPieceFrame}>
+                        <TouchableOpacity  style={styles.artPieceFrame} >
                                 <Image source={ {uri: item.downloadURL}} style={styles.artPiece} />
                         </TouchableOpacity>
                         <View style={styles.artPieceTextContainer}> 
